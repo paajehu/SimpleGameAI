@@ -1,0 +1,78 @@
+//  Just a basic, simple AI for a game using grid based levels.
+//  AI simply counts the closest-to-player direction where to move to.
+//  This code snippet uses simple game framework to use vectors.
+//  The game contains movable and unmovable. The AI cannot move any walls.
+//  Returns true if AI can move, false if not.
+
+public bool MoveAI(PhysicsObject ai)
+    {
+
+        List<Vector> AIDirections = AIDirectionsSub();          /// List with all the directions.
+
+        for (int i = 0; i < AIDirections.Count; i++)            /// Checking whether the player is next to the AI itself.
+        {
+            Vector check = new Vector();
+            check.X = ai.X + (AIDirections[i].X * GRID_SIZE);
+            check.Y = ai.Y + (AIDirections[i].Y * GRID_SIZE);
+
+            if (check == pelaaja1.Position)
+                GameOver();
+        }
+
+        for (int i = 0; i < AIDirections.Count; )               /// Checking available directions, removing the ones already filled with unmovable walls.
+        {
+            Vector check = Vector.Zero;
+            check.X = ai.X + (AIDirections[i].X * GRID_SIZE);
+            check.Y = ai.Y + (AIDirections[i].Y * GRID_SIZE);
+
+            for (int iy = 0; iy < unmovableWalls.Count; iy++)
+            {
+                if (check == unmovableWalls[iy].Position)
+                {
+                    AIDirections.RemoveAt(i);
+                    i--;
+                    break;
+                }
+
+            }
+            i++;
+        }
+        for (int i = 0; i < AIDirections.Count; )                /// Checking movable walls.
+        {
+            Vector check = Vector.Zero;
+            check.X = ai.X + (AIDirections[i].X * GRID_SIZE);
+            check.Y = ai.Y + (AIDirections[i].Y * GRID_SIZE);
+
+            for (int iz = 0; iz < movableWalls.Count; iz++)
+            {
+                if (check == movableWalls[iz].Position)
+                {
+                    AIDirections.RemoveAt(i);
+                    i--;
+                    break;
+                }
+            }
+            i++;
+        }
+        if (AIDirections.Count <= 0)                             /// If the AI cannot move.
+        {
+            return false;
+        }
+
+        double shortest = double.MaxValue;                       /// Checking the closest available direction to move to.
+        Vector wheretomove = new Vector();
+        for (int i = 0; i < AIDirections.Count; i++)
+        {
+            double distance = CountDistance(ai, AIDirections[i], player1.Position);
+            if (distance <= shortest)
+            {
+                shortest = distance;
+                wheretomove = AIDirections[i];
+            }
+        }
+        ai.X = ai.X + (wheretomove.X * GRID_SIZE);                /// Moves the AI to the closest.
+        ai.Y = ai.Y + (wheretomove.Y * GRID_SIZE);
+
+
+        return true;                                              /// If the AI can move.
+    }
